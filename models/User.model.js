@@ -22,7 +22,8 @@ const userSchema=mongoose.Schema({
     },
     recovery:{
         type:String,
-        required:true
+        required:true,
+        default:"",
     },
     isOnline:{
         type:Boolean,

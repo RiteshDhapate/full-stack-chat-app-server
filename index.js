@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const env = require('dotenv');
 env.config();
 const fs = require('fs');

@@ -3,6 +3,22 @@ const userRequest = require("../models/send_User_Request.model");
 const Chat = require("../models/massage.model");
 const jwt = require("jsonwebtoken");
 const Group = require("../models/Group.model");
+const nodemailer = require('nodemailer');
+
+//otp generated frunction
+function generateOTP() {
+  // Define the length of the OTP
+  const otpLength = 6;
+
+  // Generate a random 6-digit number
+  const otp = Math.floor(Math.random() * Math.pow(10, otpLength));
+
+  // Ensure the OTP is exactly 6 digits by padding with zeros if necessary
+  const formattedOTP = otp.toString().padStart(otpLength, '0');
+
+  return formattedOTP;
+}
+
 const userInfo = async function (req, res) {
   try {
     const email = req.body.email;
@@ -11,7 +27,8 @@ const userInfo = async function (req, res) {
       res.status(401).json({ massage: "fill Fildes are required" });
       return;
     }
-    const userInformation = await UserModel.aggregate([{$match:{email}},{$lookup:{from:"userrequests",localField:"_id",foreignField:"reciverId",as:"friends"}}])
+    const userInformation = await UserModel.aggregate([{$match:{email}},{$lookup:{from:"userrequests",localField:"_id",foreignField:"reciverId",as:"friends"}}]);
+    
     if(userInformation.length === 0) {
       res.status(401).json({ massage: "check Email and password" });
       return;
@@ -230,5 +247,60 @@ const {groupId}=data;
       console.error(error);;
   }
 }
+const forgetPassword =async (req,res)=>{
+try {
+  const {toEmail} = req.body;
+  const otp=generateOTP()
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    // port: 587,
+    auth: {
+        user: 'rieshdhapatepatil@gmail.com',
+        pass: 'qivfhfxkjjftcjwa'
+    }
+});
+const info = await transporter.sendMail({
+  from: '"SwiftTalk 👻" <swifttalk@gmail.com>', // sender address
+  to:toEmail, // list of receivers
+  subject: "Reset Password", // Subject line
+  text: "hello from node js", // plain text body
+  html: `
+        <p> 🔐 Forgot your password? No worries! </p>
+        <b>OTP: <strong>${otp}</strong></b>  
+        <p>If you didn't request this, simply ignore this message.</p>
+        <p>Stay secure,</p>
+        <p>SwiftTalk team</p>
+    `, // html body
+});
+console.log("Message sent: %s", info.messageId);
+res.json({message:"email sent successfully",otp});
+} catch (error) {
+  res.json({message:"mail not sent !!!!"});
+  console.log(error)
+}
+}
 
-module.exports = { userInfo,groupChatMessage,groupChat,allJoinedGroup,allGroups,joinGroup,updateStatus,userRequestController,allUsers,requestData,frendsData ,chat};
+
+const updatePassword=async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  try {
+      // Check if the user exists
+      const existingUser = await UserModel.findOne({ email });
+
+      if (!existingUser) {
+          return res.status(404).json({ message: 'User not found.' });
+      }
+
+      // Update the user's password using the save method
+      existingUser.password = newPassword;
+      await existingUser.save();
+
+      // You might want to send a confirmation email or response here
+      return res.status(200).json({ message: 'Password updated successfully.' });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Internal Server Error.' });
+  }
+}
+module.exports = { userInfo,forgetPassword,updatePassword,groupChatMessage,groupChat,allJoinedGroup,allGroups,joinGroup,updateStatus,userRequestController,allUsers,requestData,frendsData ,chat};

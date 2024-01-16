@@ -15,10 +15,13 @@ const Chat = require("./models/massage.model");
 const Group = require("./models/Group.model");
 const {groupChat} = require("./controllers/user.controller");
 // *************************************************
-// mongodb connection 
+// mongodb connection
+
 //***************************************************
 require("./middlewares/dbConnction");
-
+app.use(express.json());
+app.use(cors());
+app.use("/user",userRoute); 
 // *************************************************
 // socket io connection
 //***************************************************
@@ -51,9 +54,7 @@ io.on("connection",(socket)=>{
 // *************************************************
 // middleware methods 
 //***************************************************
-app.use(express.json());
-app.use(cors());
-app.use("/user",userRoute);
+
 app.get("/",(req,res)=>{
     res.send("Hello World");
 });

@@ -15,4 +15,4 @@ route.get("/allJoinedGroup/:userId",allJoinedGroup);
 route.get("/groupChatMessage/:groupId",groupChatMessage);
 route.post("/forgetPassword",forgetPassword);
 route.post("/updatePassword",updatePassword);
-module.exports= route ;  
+    module.exports= route ;  
